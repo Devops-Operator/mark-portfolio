@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Price Notifier | Mark M. Orwa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { bg: '#050510', neon: { cyan: '#00f3ff', purple: '#bc13fe' } } } }
+        }
+    </script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Orbitron:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            background-color: #050510;
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .price-up {
+            color: #22c55e;
+        }
+
+        .price-down {
+            color: #ef4444;
+        }
+    </style>
+</head>
+
+<body class="bg-bg text-white min-h-screen flex flex-col">
+    <div
+        class="fixed bottom-[-20%] left-[-10%] w-[500px] h-[500px] bg-yellow-500/10 rounded-full blur-[120px] pointer-events-none">
+    </div>
+    <div class="container mx-auto px-4 py-8 flex-grow flex flex-col">
+        <header class="flex justify-between items-center mb-8">
+            <a href="../../skills/python-automation.html"
+                class="text-cyan-400 hover:text-white transition-colors flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+                Back to Python Scripts
+            </a>
+            <h1
+                class="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500">
+                CRYPTO PRICE NOTIFIER</h1>
+        </header>
+        <main class="flex-grow grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- BTC -->
+            <div class="glass-panel p-6 rounded-2xl">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 rounded-full bg-orange-500/20 flex items-center justify-center text-2xl">₿
+                    </div>
+                    <div>
+                        <div class="text-lg font-bold">Bitcoin</div>
+                        <div class="text-sm text-gray-400">BTC/USDT</div>
+                    </div>
+                </div>
+                <div class="text-4xl font-bold mb-2" id="btcPrice">$43,250.00</div>
+                <div class="text-sm" id="btcChange">+2.34%</div>
+                <div class="mt-4 pt-4 border-t border-white/10">
+                    <label class="text-xs text-gray-400">Alert when price reaches:</label>
+                    <div class="flex gap-2 mt-2">
+                        <input type="number" id="btcAlert" value="45000"
+                            class="bg-white/5 border border-white/10 rounded px-3 py-2 text-sm flex-1">
+                        <button onclick="setAlert('BTC', document.getElementById('btcAlert').value)"
+                            class="px-4 py-2 bg-orange-500/20 border border-orange-500 text-orange-400 rounded text-sm hover:bg-orange-500 hover:text-black transition-all">SET</button>
+                    </div>
+                </div>
+            </div>
+            <!-- ETH -->
+            <div class="glass-panel p-6 rounded-2xl">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center text-2xl">Ξ</div>
+                    <div>
+                        <div class="text-lg font-bold">Ethereum</div>
+                        <div class="text-sm text-gray-400">ETH/USDT</div>
+                    </div>
+                </div>
+                <div class="text-4xl font-bold mb-2" id="ethPrice">$2,280.50</div>
+                <div class="text-sm" id="ethChange">+1.12%</div>
+                <div class="mt-4 pt-4 border-t border-white/10">
+                    <label class="text-xs text-gray-400">Alert when price reaches:</label>
+                    <div class="flex gap-2 mt-2">
+                        <input type="number" id="ethAlert" value="2500"
+                            class="bg-white/5 border border-white/10 rounded px-3 py-2 text-sm flex-1">
+                        <button onclick="setAlert('ETH', document.getElementById('ethAlert').value)"
+                            class="px-4 py-2 bg-blue-500/20 border border-blue-500 text-blue-400 rounded text-sm hover:bg-blue-500 hover:text-black transition-all">SET</button>
+                    </div>
+                </div>
+            </div>
+            <!-- SOL -->
+            <div class="glass-panel p-6 rounded-2xl">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center text-2xl">◎
+                    </div>
+                    <div>
+                        <div class="text-lg font-bold">Solana</div>
+                        <div class="text-sm text-gray-400">SOL/USDT</div>
+                    </div>
+                </div>
+                <div class="text-4xl font-bold mb-2" id="solPrice">$98.45</div>
+                <div class="text-sm" id="solChange">-0.85%</div>
+                <div class="mt-4 pt-4 border-t border-white/10">
+                    <label class="text-xs text-gray-400">Alert when price reaches:</label>
+                    <div class="flex gap-2 mt-2">
+                        <input type="number" id="solAlert" value="100"
+                            class="bg-white/5 border border-white/10 rounded px-3 py-2 text-sm flex-1">
+                        <button onclick="setAlert('SOL', document.getElementById('solAlert').value)"
+                            class="px-4 py-2 bg-purple-500/20 border border-purple-500 text-purple-400 rounded text-sm hover:bg-purple-500 hover:text-black transition-all">SET</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <!-- Alerts Log -->
+        <div class="glass-panel p-4 rounded-2xl mt-6">
+            <h3 class="font-bold text-sm mb-2 text-gray-400">ALERT LOG</h3>
+            <div id="alertLog" class="text-sm space-y-1 max-h-32 overflow-y-auto"></div>
+        </div>
+    </div>
+    <script>
+        const prices = { BTC: 43250, ETH: 2280.5, SOL: 98.45 };
+        const alerts = {};
+
+        function updatePrice(coin, el, changeEl) {
+            const change = (Math.random() - 0.5) * 100;
+            prices[coin] += change;
+            el.textContent = `$${prices[coin].toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            const pct = (change / prices[coin]) * 100;
+            changeEl.textContent = `${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%`;
+            changeEl.className = `text-sm ${pct >= 0 ? 'price-up' : 'price-down'}`;
+
+            if (alerts[coin] && prices[coin] >= alerts[coin]) {
+                logAlert(`🚨 ${coin} reached $${alerts[coin]}! Current: $${prices[coin].toFixed(2)}`);
+                delete alerts[coin];
+            }
+        }
+
+        function setAlert(coin, price) {
+            alerts[coin] = parseFloat(price);
+            logAlert(`✓ Alert set for ${coin} at $${price}`);
+        }
+
+        function logAlert(msg) {
+            const log = document.getElementById('alertLog');
+            const div = document.createElement('div');
+            div.className = 'text-cyan-400';
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            log.prepend(div);
+        }
+
+        setInterval(() => {
+            updatePrice('BTC', document.getElementById('btcPrice'), document.getElementById('btcChange'));
+            updatePrice('ETH', document.getElementById('ethPrice'), document.getElementById('ethChange'));
+            updatePrice('SOL', document.getElementById('solPrice'), document.getElementById('solChange'));
+        }, 2000);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth Flow Analyzer | Mark M. Orwa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: { colors: { bg: '#050510', neon: { cyan: '#00f3ff', purple: '#bc13fe' } } } } }
+    </script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Orbitron:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            background-color: #050510;
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            width: 100%;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #bc13fe;
+        }
+    </style>
+</head>
+
+<body class="bg-bg text-white min-h-screen flex flex-col">
+    <div
+        class="fixed top-[-20%] right-[-10%] w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[120px] pointer-events-none">
+    </div>
+    <div class="container mx-auto px-4 py-8 flex-grow flex flex-col">
+        <header class="flex justify-between items-center mb-8">
+            <a href="../../skills/security-research.html"
+                class="text-cyan-400 hover:text-white transition-colors flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+                Back to Security Research
+            </a>
+            <h1
+                class="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
+                AUTH FLOW ANALYZER</h1>
+        </header>
+        <main class="flex-grow flex flex-col md:flex-row gap-8 items-start">
+            <!-- Login Form Simulation -->
+            <div class="w-full md:w-1/2 glass-panel p-8 rounded-2xl">
+                <h2 class="text-xl font-bold mb-6 text-purple-400">Simulated Login Form</h2>
+                <form id="loginForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Username</label>
+                        <input type="text" id="username" placeholder="admin">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Password</label>
+                        <input type="password" id="password" placeholder="••••••••">
+                    </div>
+                    <button type="submit"
+                        class="w-full py-3 rounded-lg bg-purple-500/10 border border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white font-bold transition-all">ATTEMPT
+                        LOGIN</button>
+                </form>
+                <div class="mt-6 text-xs text-gray-500">
+                    <p>Try multiple rapid logins or common passwords to trigger vulnerability detections.</p>
+                </div>
+            </div>
+            <!-- Analysis Results -->
+            <div class="w-full md:w-1/2 glass-panel p-8 rounded-2xl">
+                <h2 class="text-xl font-bold mb-6 text-gray-300">Security Analysis</h2>
+                <div id="findings" class="space-y-4">
+                    <!-- Findings will appear here -->
+                </div>
+                <div class="mt-6 pt-6 border-t border-white/10">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-400">Risk Score</span>
+                        <span id="riskScore" class="text-3xl font-bold text-green-400">0</span>
+                    </div>
+                    <div class="w-full bg-white/10 h-2 rounded-full mt-2">
+                        <div id="riskBar" class="h-2 rounded-full bg-green-400 transition-all" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script>
+        let loginAttempts = 0;
+        let riskScore = 0;
+        const findings = document.getElementById('findings');
+        const commonPasswords = ['password', '123456', 'admin', 'letmein', 'welcome', 'password123'];
+
+        function addFinding(title, desc, severity) {
+            const colors = { low: 'border-yellow-400 bg-yellow-400/10', medium: 'border-orange-400 bg-orange-400/10', high: 'border-red-400 bg-red-400/10' };
+            const div = document.createElement('div');
+            div.className = `p-4 rounded-lg border ${colors[severity]}`;
+            div.innerHTML = `
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="text-xs uppercase font-bold ${severity === 'high' ? 'text-red-400' : severity === 'medium' ? 'text-orange-400' : 'text-yellow-400'}">${severity}</span>
+                    <span class="font-bold">${title}</span>
+                </div>
+                <p class="text-sm text-gray-400">${desc}</p>
+            `;
+            findings.prepend(div);
+        }
+
+        function updateRisk(add) {
+            riskScore = Math.min(100, riskScore + add);
+            document.getElementById('riskScore').textContent = riskScore;
+            document.getElementById('riskBar').style.width = riskScore + '%';
+
+            const scoreEl = document.getElementById('riskScore');
+            const barEl = document.getElementById('riskBar');
+            if (riskScore > 70) {
+                scoreEl.className = 'text-3xl font-bold text-red-400';
+                barEl.className = 'h-2 rounded-full bg-red-400 transition-all';
+            } else if (riskScore > 40) {
+                scoreEl.className = 'text-3xl font-bold text-orange-400';
+                barEl.className = 'h-2 rounded-full bg-orange-400 transition-all';
+            } else {
+                scoreEl.className = 'text-3xl font-bold text-yellow-400';
+                barEl.className = 'h-2 rounded-full bg-yellow-400 transition-all';
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            loginAttempts++;
+
+            const password = document.getElementById('password').value;
+            const username = document.getElementById('username').value;
+
+            // Check for weak password
+            if (commonPasswords.includes(password.toLowerCase())) {
+                addFinding('Weak Password Detected', `The password "${password}" is in the top 100 most common passwords list.`, 'high');
+                updateRisk(25);
+            }
+
+            // Check for rate limiting
+            if (loginAttempts > 3 && loginAttempts <= 5) {
+                addFinding('No Rate Limiting', `${loginAttempts} login attempts allowed without throttling. Brute force risk.`, 'medium');
+                updateRisk(15);
+            } else if (loginAttempts > 5) {
+                addFinding('Brute Force Possible', `${loginAttempts} attempts made. No lockout mechanism detected.`, 'high');
+                updateRisk(20);
+            }
+
+            // Check for username enumeration
+            if (username === 'admin') {
+                addFinding('Username Enumeration', 'Different error messages for valid vs invalid usernames allow enumeration.', 'low');
+                updateRisk(10);
+            }
+
+            // Simulate failed login
+            if (loginAttempts === 1) {
+                addFinding('Login Attempt Logged', `First login attempt recorded at ${new Date().toLocaleTimeString()}`, 'low');
+            }
+        });
+    </script>
+</body>
+
+</html>

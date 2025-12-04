@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fraud Detection | Mark M. Orwa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bg: '#050510',
+                        neon: { cyan: '#00f3ff', purple: '#bc13fe', blue: '#0066ff' },
+                    },
+                    fontFamily: {
+                        orbitron: ['Orbitron', 'sans-serif'],
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Orbitron:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            background-color: #050510;
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .log-entry {
+            font-family: 'Courier New', monospace;
+            border-left: 2px solid transparent;
+        }
+
+        .log-entry.fraud {
+            border-left-color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+    </style>
+</head>
+
+<body class="bg-bg text-white min-h-screen flex flex-col">
+    <!-- Background Glows -->
+    <div
+        class="fixed top-[-20%] right-[-10%] w-[500px] h-[500px] bg-red-500/10 rounded-full blur-[120px] pointer-events-none">
+    </div>
+
+    <div class="container mx-auto px-4 py-8 flex-grow flex flex-col">
+        <header class="flex justify-between items-center mb-8">
+            <a href="../../skills/data-science.html"
+                class="text-cyan-400 hover:text-white transition-colors flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+                Back to Data Science
+            </a>
+            <h1
+                class="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-500">
+                REAL-TIME FRAUD DETECTOR
+            </h1>
+        </header>
+
+        <main class="flex-grow flex flex-col md:flex-row gap-8">
+            <!-- Visualization -->
+            <div class="w-full md:w-2/3 glass-panel p-6 rounded-2xl flex flex-col">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-red-500">Live Transaction Stream</h2>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                        <span class="text-xs text-red-500 font-bold">LIVE</span>
+                    </div>
+                </div>
+                <div class="flex-grow relative h-64 md:h-auto">
+                    <canvas id="streamChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Logs -->
+            <div class="w-full md:w-1/3 glass-panel p-6 rounded-2xl h-[500px] flex flex-col">
+                <h2 class="text-xl font-bold mb-4 text-gray-300">Detection Logs</h2>
+                <div id="logs" class="flex-grow overflow-y-auto space-y-2 text-xs text-gray-400 pr-2">
+                    <!-- Logs go here -->
+                </div>
+                <div class="mt-4 pt-4 border-t border-white/10">
+                    <button id="toggleStream"
+                        class="w-full py-2 rounded border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors font-bold">
+                        PAUSE STREAM
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('streamChart').getContext('2d');
+        const logContainer = document.getElementById('logs');
+        let isStreaming = true;
+
+        // Initial data
+        const maxPoints = 50;
+        const labels = Array(maxPoints).fill('').map((_, i) => i);
+        const dataPoints = Array(maxPoints).fill(50);
+
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Transaction Amount ($)',
+                    data: dataPoints,
+                    borderColor: '#ef4444',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    tension: 0.4,
+                    fill: true,
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false,
+                scales: {
+                    y: { min: 0, max: 200, grid: { color: 'rgba(255,255,255,0.05)' } },
+                    x: { display: false }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        function addLog(amount, isFraud) {
+            const div = document.createElement('div');
+            const time = new Date().toLocaleTimeString();
+            div.className = `log-entry p-2 rounded ${isFraud ? 'fraud text-white' : ''}`;
+            div.innerHTML = `
+                <span class="opacity-50">[${time}]</span> 
+                TX: $${amount.toFixed(2)} 
+                ${isFraud ? '<span class="font-bold text-red-400 ml-2">⚠️ ANOMALY DETECTED</span>' : '<span class="text-green-500 ml-2">✓ Verified</span>'}
+            `;
+            logContainer.prepend(div);
+            if (logContainer.children.length > 20) logContainer.lastChild.remove();
+        }
+
+        setInterval(() => {
+            if (!isStreaming) return;
+
+            // Simulate transaction
+            let amount = 20 + Math.random() * 60; // Normal range 20-80
+            let isFraud = false;
+
+            // Random anomaly
+            if (Math.random() > 0.9) {
+                amount = 150 + Math.random() * 50; // Spike
+                isFraud = true;
+            }
+
+            // Update chart
+            dataPoints.push(amount);
+            dataPoints.shift();
+            chart.update();
+
+            // Log
+            addLog(amount, isFraud);
+
+        }, 800);
+
+        document.getElementById('toggleStream').addEventListener('click', function () {
+            isStreaming = !isStreaming;
+            this.textContent = isStreaming ? 'PAUSE STREAM' : 'RESUME STREAM';
+            this.classList.toggle('bg-red-500');
+            this.classList.toggle('text-white');
+        });
+    </script>
+</body>
+
+</html>

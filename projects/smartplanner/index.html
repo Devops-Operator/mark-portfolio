@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartPlanner | Mark M. Orwa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: { colors: { bg: '#050510', neon: { cyan: '#00f3ff', purple: '#bc13fe' } } } } }
+    </script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Orbitron:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            background-color: #050510;
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .phone-frame {
+            width: 375px;
+            height: 667px;
+            border-radius: 40px;
+            border: 8px solid #1a1a2e;
+            overflow: hidden;
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%);
+        }
+
+        .task-item {
+            transition: all 0.3s ease;
+        }
+
+        .task-item.completed {
+            opacity: 0.5;
+            text-decoration: line-through;
+        }
+    </style>
+</head>
+
+<body class="bg-bg text-white min-h-screen flex flex-col">
+    <div
+        class="fixed bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[120px] pointer-events-none">
+    </div>
+    <div class="container mx-auto px-4 py-8 flex-grow flex flex-col">
+        <header class="flex justify-between items-center mb-8">
+            <a href="../../skills/flutter-apps.html"
+                class="text-cyan-400 hover:text-white transition-colors flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+                Back to Flutter Apps
+            </a>
+            <h1
+                class="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
+                SMARTPLANNER</h1>
+        </header>
+        <main class="flex-grow flex flex-col md:flex-row items-center justify-center gap-12">
+            <div class="phone-frame shadow-2xl shadow-purple-500/20">
+                <div class="h-full flex flex-col p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <div class="text-sm text-gray-400">Good Morning</div>
+                            <div class="text-xl font-bold">Today's Plan</div>
+                        </div>
+                        <button onclick="aiSuggest()"
+                            class="px-4 py-2 bg-purple-500/20 border border-purple-500 text-purple-400 rounded-lg text-xs hover:bg-purple-500 hover:text-white transition-all flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                            </svg>
+                            AI Suggest
+                        </button>
+                    </div>
+                    <!-- Add Task -->
+                    <div class="flex gap-2 mb-6">
+                        <input type="text" id="newTask" placeholder="Add new task..."
+                            class="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-sm">
+                        <button onclick="addTask()"
+                            class="px-4 bg-purple-500 rounded-lg hover:bg-purple-600 transition-colors">+</button>
+                    </div>
+                    <!-- Tasks -->
+                    <div class="flex-grow overflow-y-auto space-y-3" id="taskList">
+                        <div class="task-item flex items-center gap-3 p-4 bg-white/5 rounded-xl cursor-pointer"
+                            onclick="toggleTask(this)">
+                            <div
+                                class="w-5 h-5 rounded-full border-2 border-purple-400 flex items-center justify-center check-circle">
+                            </div>
+                            <span class="flex-1">Review project proposal</span>
+                            <span class="text-xs text-gray-500">9:00 AM</span>
+                        </div>
+                        <div class="task-item flex items-center gap-3 p-4 bg-white/5 rounded-xl cursor-pointer"
+                            onclick="toggleTask(this)">
+                            <div
+                                class="w-5 h-5 rounded-full border-2 border-purple-400 flex items-center justify-center check-circle">
+                            </div>
+                            <span class="flex-1">Team standup meeting</span>
+                            <span class="text-xs text-gray-500">10:30 AM</span>
+                        </div>
+                        <div class="task-item flex items-center gap-3 p-4 bg-white/5 rounded-xl cursor-pointer completed"
+                            onclick="toggleTask(this)">
+                            <div
+                                class="w-5 h-5 rounded-full border-2 border-purple-400 bg-purple-400 flex items-center justify-center check-circle">
+                                ✓</div>
+                            <span class="flex-1">Morning workout</span>
+                            <span class="text-xs text-gray-500">7:00 AM</span>
+                        </div>
+                    </div>
+                    <!-- Stats -->
+                    <div class="mt-4 pt-4 border-t border-white/10 flex justify-between text-sm">
+                        <span class="text-gray-400"><span id="completedCount">1</span> completed</span>
+                        <span class="text-gray-400"><span id="pendingCount">2</span> pending</span>
+                    </div>
+                </div>
+            </div>
+            <div class="max-w-md">
+                <h2 class="text-2xl font-bold mb-4 text-purple-400">AI-Powered Task Planner</h2>
+                <p class="text-gray-400 leading-relaxed mb-6">Smart task management app with Gemini AI integration.
+                    Click "AI Suggest" to auto-generate relevant tasks based on your schedule. Complete tasks by tapping
+                    them.</p>
+                <div class="flex flex-wrap gap-2">
+                    <span
+                        class="px-3 py-1 text-xs rounded-full bg-purple-400/10 text-purple-400 border border-purple-400/20">Flutter</span>
+                    <span
+                        class="px-3 py-1 text-xs rounded-full bg-purple-400/10 text-purple-400 border border-purple-400/20">Gemini
+                        API</span>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script>
+        const aiTasks = ['Prepare presentation slides', 'Reply to client emails', 'Code review for PR #42', 'Update documentation', 'Schedule 1:1 with manager', 'Research new frameworks'];
+        let aiIdx = 0;
+
+        function addTask(text) {
+            const input = document.getElementById('newTask');
+            const taskText = text || input.value.trim();
+            if (!taskText) return;
+            const list = document.getElementById('taskList');
+            const div = document.createElement('div');
+            div.className = 'task-item flex items-center gap-3 p-4 bg-white/5 rounded-xl cursor-pointer';
+            div.onclick = function () { toggleTask(this); };
+            const time = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+            div.innerHTML = `<div class="w-5 h-5 rounded-full border-2 border-purple-400 flex items-center justify-center check-circle"></div><span class="flex-1">${taskText}</span><span class="text-xs text-gray-500">${time}</span>`;
+            list.prepend(div);
+            input.value = '';
+            updateCounts();
+        }
+
+        function toggleTask(el) {
+            el.classList.toggle('completed');
+            const circle = el.querySelector('.check-circle');
+            if (el.classList.contains('completed')) {
+                circle.classList.add('bg-purple-400');
+                circle.textContent = '✓';
+            } else {
+                circle.classList.remove('bg-purple-400');
+                circle.textContent = '';
+            }
+            updateCounts();
+        }
+
+        function aiSuggest() {
+            addTask(aiTasks[aiIdx % aiTasks.length]);
+            aiIdx++;
+        }
+
+        function updateCounts() {
+            const all = document.querySelectorAll('.task-item');
+            const completed = document.querySelectorAll('.task-item.completed');
+            document.getElementById('completedCount').textContent = completed.length;
+            document.getElementById('pendingCount').textContent = all.length - completed.length;
+        }
+    </script>
+</body>
+
+</html>

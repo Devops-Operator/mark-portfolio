@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recon Aggregator | Mark M. Orwa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: { colors: { bg: '#050510', neon: { cyan: '#00f3ff', purple: '#bc13fe' } } } } }
+    </script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Orbitron:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            background-color: #050510;
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+
+<body class="bg-bg text-white min-h-screen flex flex-col">
+    <div
+        class="fixed bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none">
+    </div>
+    <div class="container mx-auto px-4 py-8 flex-grow flex flex-col">
+        <header class="flex justify-between items-center mb-8">
+            <a href="../../skills/security-research.html"
+                class="text-cyan-400 hover:text-white transition-colors flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+                Back to Security Research
+            </a>
+            <h1
+                class="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
+                RECON AGGREGATOR</h1>
+        </header>
+        <main class="flex-grow flex flex-col md:flex-row gap-8">
+            <div class="w-full md:w-1/3 glass-panel p-6 rounded-2xl h-fit">
+                <h2 class="text-xl font-bold mb-4 text-cyan-400">Target Domain</h2>
+                <div class="space-y-4">
+                    <input type="text" id="domain" value="example.com"
+                        class="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white">
+                    <button id="runRecon"
+                        class="w-full py-3 rounded-lg bg-cyan-400/10 border border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-black font-bold transition-all">RUN
+                        RECON</button>
+                </div>
+                <div class="mt-6 pt-4 border-t border-white/10">
+                    <h3 class="font-bold mb-3">Discovery Stats</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between"><span class="text-gray-400">Subdomains</span><span
+                                class="font-bold text-cyan-400" id="subCount">0</span></div>
+                        <div class="flex justify-between"><span class="text-gray-400">Live Hosts</span><span
+                                class="font-bold text-green-400" id="liveCount">0</span></div>
+                        <div class="flex justify-between"><span class="text-gray-400">Open Ports</span><span
+                                class="font-bold text-yellow-400" id="portCount">0</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="w-full md:w-2/3 glass-panel p-6 rounded-2xl">
+                <h2 class="text-xl font-bold mb-4 text-gray-300">Discovered Assets</h2>
+                <div id="assetTree" class="space-y-2 overflow-y-auto max-h-[500px]">
+                    <div class="text-gray-500 text-center py-8">Enter a domain and click RUN RECON</div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script>
+        const subdomains = ['www', 'api', 'mail', 'admin', 'dev', 'staging', 'beta', 'cdn', 'static', 'blog', 'shop', 'secure', 'portal', 'vpn'];
+        const ports = [80, 443, 22, 8080, 3000, 8443];
+
+        async function runRecon() {
+            const domain = document.getElementById('domain').value;
+            const tree = document.getElementById('assetTree');
+            tree.innerHTML = '';
+
+            let subs = 0, live = 0, openPorts = 0;
+
+            for (const sub of subdomains) {
+                await new Promise(r => setTimeout(r, 200));
+
+                const isLive = Math.random() > 0.3;
+                subs++;
+                if (isLive) live++;
+
+                const hostname = `${sub}.${domain}`;
+                const hostPorts = ports.filter(() => isLive && Math.random() > 0.6);
+                openPorts += hostPorts.length;
+
+                const div = document.createElement('div');
+                div.className = 'bg-white/5 rounded-lg p-3';
+                div.innerHTML = `
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="w-2 h-2 rounded-full ${isLive ? 'bg-green-400' : 'bg-red-400'}"></span>
+                        <span class="font-mono text-sm ${isLive ? 'text-white' : 'text-gray-500'}">${hostname}</span>
+                        <span class="text-xs text-gray-500 ml-auto">${isLive ? 'LIVE' : 'DOWN'}</span>
+                    </div>
+                    ${hostPorts.length > 0 ? `<div class="flex gap-2 flex-wrap">${hostPorts.map(p => `<span class="px-2 py-1 text-xs rounded bg-cyan-400/10 text-cyan-400">:${p}</span>`).join('')}</div>` : ''}
+                `;
+                tree.appendChild(div);
+
+                document.getElementById('subCount').textContent = subs;
+                document.getElementById('liveCount').textContent = live;
+                document.getElementById('portCount').textContent = openPorts;
+            }
+        }
+
+        document.getElementById('runRecon').addEventListener('click', runRecon);
+    </script>
+</body>
+
+</html>

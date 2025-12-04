@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickPay Wallet | Mark M. Orwa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: { colors: { bg: '#050510', neon: { cyan: '#00f3ff', purple: '#bc13fe' } } } } }
+    </script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Orbitron:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            background-color: #050510;
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .phone-frame {
+            width: 375px;
+            height: 667px;
+            border-radius: 40px;
+            border: 8px solid #1a1a2e;
+            overflow: hidden;
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%);
+        }
+    </style>
+</head>
+
+<body class="bg-bg text-white min-h-screen flex flex-col">
+    <div
+        class="fixed top-[-20%] left-[-10%] w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none">
+    </div>
+    <div class="container mx-auto px-4 py-8 flex-grow flex flex-col">
+        <header class="flex justify-between items-center mb-8">
+            <a href="../../skills/flutter-apps.html"
+                class="text-cyan-400 hover:text-white transition-colors flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+                Back to Flutter Apps
+            </a>
+            <h1
+                class="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
+                QUICKPAY WALLET</h1>
+        </header>
+        <main class="flex-grow flex flex-col md:flex-row items-center justify-center gap-12">
+            <!-- Phone Mockup -->
+            <div class="phone-frame shadow-2xl shadow-cyan-500/20">
+                <div class="h-full flex flex-col p-6" id="walletScreen">
+                    <!-- Header -->
+                    <div class="flex justify-between items-center mb-8">
+                        <span class="text-sm text-gray-400">QuickPay</span>
+                        <div
+                            class="w-8 h-8 rounded-full bg-cyan-400/20 flex items-center justify-center text-cyan-400 text-sm">
+                            MM</div>
+                    </div>
+                    <!-- Balance Card -->
+                    <div class="bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl p-6 mb-6">
+                        <div class="text-sm text-white/70 mb-1">Total Balance</div>
+                        <div class="text-4xl font-bold" id="balance">$4,250.00</div>
+                        <div class="text-sm text-white/70 mt-4">**** **** **** 4829</div>
+                    </div>
+                    <!-- Actions -->
+                    <div class="grid grid-cols-3 gap-4 mb-6">
+                        <button onclick="showSend()"
+                            class="flex flex-col items-center gap-2 p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" class="text-cyan-400">
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                            </svg>
+                            <span class="text-xs">Send</span>
+                        </button>
+                        <button
+                            class="flex flex-col items-center gap-2 p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" class="text-green-400">
+                                <polyline points="22 12 16 12 13 15 11 15 8 12 2 12"></polyline>
+                                <path
+                                    d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z">
+                                </path>
+                            </svg>
+                            <span class="text-xs">Receive</span>
+                        </button>
+                        <button
+                            class="flex flex-col items-center gap-2 p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" class="text-purple-400">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            <span class="text-xs">Top Up</span>
+                        </button>
+                    </div>
+                    <!-- Transactions -->
+                    <div class="flex-grow">
+                        <div class="text-sm text-gray-400 mb-3">Recent Transactions</div>
+                        <div class="space-y-3" id="transactions">
+                            <div class="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-8 h-8 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center text-xs">
+                                        →</div>
+                                    <div>
+                                        <div class="text-sm">To: John D.</div>
+                                        <div class="text-xs text-gray-500">Today, 10:24 AM</div>
+                                    </div>
+                                </div>
+                                <div class="text-red-400 text-sm">-$50.00</div>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-8 h-8 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center text-xs">
+                                        ←</div>
+                                    <div>
+                                        <div class="text-sm">From: Sarah M.</div>
+                                        <div class="text-xs text-gray-500">Yesterday</div>
+                                    </div>
+                                </div>
+                                <div class="text-green-400 text-sm">+$120.00</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Send Screen (Hidden) -->
+                <div class="h-full flex flex-col p-6 hidden" id="sendScreen">
+                    <button onclick="hideSend()" class="text-cyan-400 text-sm mb-6 flex items-center gap-2">←
+                        Back</button>
+                    <h2 class="text-xl font-bold mb-6">Send Money</h2>
+                    <div class="mb-4">
+                        <label class="text-sm text-gray-400 mb-1 block">Recipient</label>
+                        <input type="text" id="recipient" placeholder="Name or @username"
+                            class="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white">
+                    </div>
+                    <div class="mb-6">
+                        <label class="text-sm text-gray-400 mb-1 block">Amount</label>
+                        <input type="number" id="sendAmount" placeholder="0.00"
+                            class="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white text-2xl">
+                    </div>
+                    <button onclick="sendMoney()"
+                        class="w-full py-4 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl font-bold hover:opacity-90 transition-opacity">SEND</button>
+                </div>
+            </div>
+            <!-- Description -->
+            <div class="max-w-md">
+                <h2 class="text-2xl font-bold mb-4 text-cyan-400">Flutter Web Prototype</h2>
+                <p class="text-gray-400 leading-relaxed mb-6">Interactive wallet UI demonstrating Flutter-style design
+                    with send/receive flows, transaction history, and balance management. Built with HTML/CSS to
+                    simulate a Flutter Web export.</p>
+                <div class="flex flex-wrap gap-2">
+                    <span
+                        class="px-3 py-1 text-xs rounded-full bg-cyan-400/10 text-cyan-400 border border-cyan-400/20">Flutter</span>
+                    <span
+                        class="px-3 py-1 text-xs rounded-full bg-cyan-400/10 text-cyan-400 border border-cyan-400/20">Dart</span>
+                    <span
+                        class="px-3 py-1 text-xs rounded-full bg-cyan-400/10 text-cyan-400 border border-cyan-400/20">Hive</span>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script>
+        let balance = 4250;
+        function showSend() { document.getElementById('walletScreen').classList.add('hidden'); document.getElementById('sendScreen').classList.remove('hidden'); }
+        function hideSend() { document.getElementById('sendScreen').classList.add('hidden'); document.getElementById('walletScreen').classList.remove('hidden'); }
+        function sendMoney() {
+            const amount = parseFloat(document.getElementById('sendAmount').value) || 0;
+            const recipient = document.getElementById('recipient').value || 'Unknown';
+            if (amount > 0 && amount <= balance) {
+                balance -= amount;
+                document.getElementById('balance').textContent = `$${balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+                const tx = document.createElement('div');
+                tx.className = 'flex justify-between items-center p-3 bg-white/5 rounded-lg';
+                tx.innerHTML = `<div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center text-xs">→</div><div><div class="text-sm">To: ${recipient}</div><div class="text-xs text-gray-500">Just now</div></div></div><div class="text-red-400 text-sm">-$${amount.toFixed(2)}</div>`;
+                document.getElementById('transactions').prepend(tx);
+                hideSend();
+            }
+        }
+    </script>
+</body>
+
+</html>

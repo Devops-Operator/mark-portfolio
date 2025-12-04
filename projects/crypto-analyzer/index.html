@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Market Analyzer | Mark M. Orwa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = { theme: { extend: { colors: { bg: '#050510', neon: { cyan: '#00f3ff', purple: '#bc13fe' } } } } }
+    </script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Orbitron:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            background-color: #050510;
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+
+<body class="bg-bg text-white min-h-screen flex flex-col">
+    <div
+        class="fixed top-[-20%] right-[-10%] w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[120px] pointer-events-none">
+    </div>
+    <div class="container mx-auto px-4 py-8 flex-grow flex flex-col">
+        <header class="flex justify-between items-center mb-8">
+            <a href="../../skills/quant-dev.html"
+                class="text-cyan-400 hover:text-white transition-colors flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+                Back to Quant Dev
+            </a>
+            <h1
+                class="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
+                CRYPTO MARKET ANALYZER</h1>
+        </header>
+        <main class="flex-grow grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Order Book -->
+            <div class="glass-panel p-6 rounded-2xl">
+                <h2 class="text-lg font-bold mb-4 text-purple-400">Order Book (BTC/USDT)</h2>
+                <div class="flex gap-4">
+                    <div class="flex-1">
+                        <div class="text-xs text-gray-400 mb-2">BIDS</div>
+                        <div id="bids" class="space-y-1 text-sm"></div>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-xs text-gray-400 mb-2">ASKS</div>
+                        <div id="asks" class="space-y-1 text-sm"></div>
+                    </div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-white/10">
+                    <div class="text-xs text-gray-400">Spread</div>
+                    <div class="text-xl font-bold" id="spread">$0.00</div>
+                </div>
+            </div>
+            <!-- Depth Chart -->
+            <div class="glass-panel p-6 rounded-2xl md:col-span-2">
+                <h2 class="text-lg font-bold mb-4 text-gray-300">Market Depth</h2>
+                <div class="h-[300px]">
+                    <canvas id="depthChart"></canvas>
+                </div>
+            </div>
+            <!-- Stats -->
+            <div class="glass-panel p-6 rounded-2xl">
+                <h2 class="text-lg font-bold mb-4 text-cyan-400">Market Stats</h2>
+                <div class="space-y-4">
+                    <div class="flex justify-between"><span class="text-gray-400">24h Volume</span><span
+                            class="font-bold" id="volume">$2.4B</span></div>
+                    <div class="flex justify-between"><span class="text-gray-400">24h High</span><span
+                            class="font-bold text-green-400" id="high">$44,200</span></div>
+                    <div class="flex justify-between"><span class="text-gray-400">24h Low</span><span
+                            class="font-bold text-red-400" id="low">$42,800</span></div>
+                    <div class="flex justify-between"><span class="text-gray-400">Open Interest</span><span
+                            class="font-bold" id="oi">$1.2B</span></div>
+                </div>
+            </div>
+            <!-- Trades -->
+            <div class="glass-panel p-6 rounded-2xl md:col-span-2">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold text-gray-300">Recent Trades</h2>
+                    <span class="text-xs text-gray-400">Live</span>
+                </div>
+                <div id="trades" class="space-y-2 max-h-[200px] overflow-y-auto text-sm"></div>
+            </div>
+        </main>
+    </div>
+    <script>
+        const ctx = document.getElementById('depthChart').getContext('2d');
+        let midPrice = 43500;
+
+        // Generate order book
+        function generateOrderBook() {
+            const bids = [], asks = [];
+            let bidPrice = midPrice - 10, askPrice = midPrice + 10;
+            for (let i = 0; i < 8; i++) {
+                bids.push({ price: bidPrice - i * 5, size: Math.random() * 10 + 1 });
+                asks.push({ price: askPrice + i * 5, size: Math.random() * 10 + 1 });
+            }
+            return { bids, asks };
+        }
+
+        function updateOrderBook() {
+            const { bids, asks } = generateOrderBook();
+
+            document.getElementById('bids').innerHTML = bids.map(b =>
+                `<div class="flex justify-between"><span class="text-green-400">$${b.price.toFixed(0)}</span><span class="text-gray-400">${b.size.toFixed(2)}</span></div>`
+            ).join('');
+
+            document.getElementById('asks').innerHTML = asks.map(a =>
+                `<div class="flex justify-between"><span class="text-red-400">$${a.price.toFixed(0)}</span><span class="text-gray-400">${a.size.toFixed(2)}</span></div>`
+            ).join('');
+
+            const spread = asks[0].price - bids[0].price;
+            document.getElementById('spread').textContent = '$' + spread.toFixed(2);
+
+            // Depth chart data
+            const bidPrices = bids.map(b => b.price).reverse();
+            const askPrices = asks.map(a => a.price);
+            let bidCumulative = 0, askCumulative = 0;
+            const bidDepth = bids.map(b => { bidCumulative += b.size; return bidCumulative; }).reverse();
+            const askDepth = asks.map(a => { askCumulative += a.size; return askCumulative; });
+
+            chart.data.labels = [...bidPrices, ...askPrices];
+            chart.data.datasets[0].data = [...bidDepth, ...Array(askPrices.length).fill(null)];
+            chart.data.datasets[1].data = [...Array(bidPrices.length).fill(null), ...askDepth];
+            chart.update('none');
+        }
+
+        function addTrade() {
+            const trades = document.getElementById('trades');
+            const isBuy = Math.random() > 0.5;
+            const price = midPrice + (Math.random() - 0.5) * 20;
+            const size = (Math.random() * 2).toFixed(4);
+            const div = document.createElement('div');
+            div.className = `flex justify-between p-2 rounded ${isBuy ? 'bg-green-500/10' : 'bg-red-500/10'}`;
+            div.innerHTML = `<span class="${isBuy ? 'text-green-400' : 'text-red-400'}">${isBuy ? 'BUY' : 'SELL'}</span><span>$${price.toFixed(2)}</span><span class="text-gray-400">${size} BTC</span><span class="text-gray-500 text-xs">${new Date().toLocaleTimeString()}</span>`;
+            trades.prepend(div);
+            if (trades.children.length > 20) trades.lastChild.remove();
+        }
+
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    { label: 'Bids', data: [], borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.2)', fill: true, tension: 0.4 },
+                    { label: 'Asks', data: [], borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.2)', fill: true, tension: 0.4 }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888' } },
+                    x: { grid: { display: false }, ticks: { color: '#888' } }
+                }
+            }
+        });
+
+        updateOrderBook();
+        setInterval(updateOrderBook, 2000);
+        setInterval(addTrade, 800);
+    </script>
+</body>
+
+</html>

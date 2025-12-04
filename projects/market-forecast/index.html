@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Demand Forecaster | Mark M. Orwa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bg: '#050510',
+                        neon: { cyan: '#00f3ff', purple: '#bc13fe', blue: '#0066ff' },
+                    },
+                    fontFamily: {
+                        orbitron: ['Orbitron', 'sans-serif'],
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Orbitron:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            background-color: #050510;
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+
+<body class="bg-bg text-white min-h-screen flex flex-col">
+    <!-- Background Glows -->
+    <div
+        class="fixed top-[-20%] left-[-10%] w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none">
+    </div>
+
+    <div class="container mx-auto px-4 py-8 flex-grow flex flex-col">
+        <header class="flex justify-between items-center mb-8">
+            <a href="../../skills/data-science.html"
+                class="text-cyan-400 hover:text-white transition-colors flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+                Back to Data Science
+            </a>
+            <h1
+                class="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
+                MARKET DEMAND FORECASTER
+            </h1>
+        </header>
+
+        <main class="flex-grow flex flex-col md:flex-row gap-8">
+            <!-- Controls -->
+            <div class="w-full md:w-1/3 glass-panel p-6 rounded-2xl h-fit">
+                <h2 class="text-xl font-bold mb-4 text-cyan-400">Model Parameters</h2>
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">Seasonality Factor</label>
+                        <input type="range" id="seasonality" min="0" max="100" value="50"
+                            class="w-full accent-cyan-400">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">Growth Trend</label>
+                        <input type="range" id="trend" min="-50" max="50" value="10" class="w-full accent-cyan-400">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">Noise Level</label>
+                        <input type="range" id="noise" min="0" max="50" value="20" class="w-full accent-cyan-400">
+                    </div>
+                    <button id="regenerate"
+                        class="w-full py-3 rounded-lg bg-cyan-400/10 border border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-black font-bold transition-all">
+                        RUN FORECAST
+                    </button>
+                </div>
+                <div class="mt-8 pt-6 border-t border-white/10">
+                    <h3 class="text-lg font-bold mb-2">About Project</h3>
+                    <p class="text-sm text-gray-400 leading-relaxed">
+                        This demo simulates a time-series forecasting model (like XGBoost or ARIMA).
+                        It generates synthetic historical data and projects future demand based on adjustable
+                        parameters.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Visualization -->
+            <div class="w-full md:w-2/3 glass-panel p-6 rounded-2xl flex flex-col">
+                <canvas id="forecastChart" class="w-full h-full"></canvas>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('forecastChart').getContext('2d');
+        let chart;
+
+        function generateData() {
+            const seasonality = document.getElementById('seasonality').value / 50;
+            const trend = document.getElementById('trend').value / 10;
+            const noise = document.getElementById('noise').value;
+
+            const labels = [];
+            const historical = [];
+            const forecast = [];
+
+            // Generate 12 months of history + 6 months forecast
+            for (let i = 0; i < 18; i++) {
+                const month = i % 12;
+                const base = 100 + (i * trend);
+                const season = Math.sin(month * Math.PI / 6) * 20 * seasonality;
+                const random = (Math.random() - 0.5) * noise;
+                const value = base + season + random;
+
+                labels.push(`Month ${i + 1}`);
+
+                if (i < 12) {
+                    historical.push(value);
+                    forecast.push(null);
+                } else {
+                    if (i === 12) {
+                        // Connect lines
+                        const lastHist = 100 + (11 * trend) + (Math.sin(11 * Math.PI / 6) * 20 * seasonality);
+                        forecast.push(lastHist);
+                        // Actually we need to overlap one point or handle nulls. Chart.js handles nulls.
+                        // Let's just push value to forecast
+                        forecast[i] = value;
+                    } else {
+                        forecast.push(value);
+                    }
+                }
+            }
+            // Fix forecast start to connect
+            forecast[11] = historical[11];
+
+            return { labels, historical, forecast };
+        }
+
+        function updateChart() {
+            const data = generateData();
+
+            if (chart) chart.destroy();
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [
+                        {
+                            label: 'Historical Data',
+                            data: data.historical,
+                            borderColor: '#00f3ff',
+                            backgroundColor: 'rgba(0, 243, 255, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Forecast Prediction',
+                            data: data.forecast,
+                            borderColor: '#bc13fe',
+                            borderDash: [5, 5],
+                            tension: 0.4,
+                            pointStyle: 'rectRot'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#fff' } }
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: '#aaa' }
+                        },
+                        x: {
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: '#aaa' }
+                        }
+                    }
+                }
+            });
+        }
+
+        document.getElementById('regenerate').addEventListener('click', updateChart);
+        document.addEventListener('DOMContentLoaded', updateChart);
+    </script>
+</body>
+
+</html>
