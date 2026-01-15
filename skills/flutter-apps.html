@@ -162,15 +162,18 @@
                 </div>
                 <a href="../projects/fittrack-lite/index.html"
                     class="inline-block w-full text-center py-3 rounded-lg border border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-black transition-all font-bold tracking-wide">VIEW
-                    PROJECT</a>
+                    DEMO</a>
             </article>
 
         </div>
 
         <footer class="text-gray-500 text-sm text-center py-8 border-t border-white/5 mt-16">
-            &copy; 2025 Mark M. Orwa. All rights reserved.
+            &copy; <span id="currentYear"></span> Mark M. Orwa. All rights reserved.
         </footer>
     </div>
+    <script>
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+    </script>
 </body>
 
 </html>
