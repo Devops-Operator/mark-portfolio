@@ -1,5 +1,5 @@
 // Main JavaScript file
-console.log("Mark M. Orwa Portfolio Loaded");
+console.log("Mark Milayi O. Portfolio Loaded");
 
 // Add any global animations or interactions here
 document.addEventListener('DOMContentLoaded', () => {
